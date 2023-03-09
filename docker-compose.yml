@@ -1,0 +1,20 @@
+version: "3.5"
+services:
+  backend:
+    image: public.ecr.aws/docker/library/golang:1.19-alpine3.16
+    command: "go run main.go"
+    working_dir: "/app"
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./backend:/app
+  frontend:
+    build:
+      context: ./frontend/.
+      dockerfile: ./Dockerfile
+    command: "npm run dev"
+    ports:
+      - "5137:5137"
+    volumes:
+      - ./frontend:/usr/src/app
+      - /usr/src/app/node_modules

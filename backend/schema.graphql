@@ -1,0 +1,20 @@
+type Query {
+  listFoos(query: String!, limit: Int, before: String, after: String): FooConnection!
+}
+
+type PageInfo {
+  hasPreviousPage: Boolean!
+  hasNextPage: Boolean!
+  startCursor: String
+  endCursor: String
+}
+
+type FooEdge {
+  node: String!
+  cursor: String!
+}
+
+type FooConnection {
+  edges: [FooEdge!]!
+  pageInfo: PageInfo!
+}
