@@ -21,9 +21,19 @@ const GET_FOOS = gql`
   }
 `;
 
+type Foo = string;
+
+interface FooEdge {
+  node: Foo;
+  cursor: string;
+}
+
 function App() {
   const [input, setInput] = useState("bus");
 
+  // Whenever the user is done typing into the input field, we load new
+  // results. For this we use "useLazyQuery", cache the function call with
+  // "useCallback", and invoke it inside of the "useEffect" below.
   const [loadFoos, { loading, error, data, fetchMore }] =
     useLazyQuery(GET_FOOS);
 
@@ -43,6 +53,16 @@ function App() {
     debouncedLoad(input);
   }, [input]);
 
+  const onClickPrevious = () => {
+    fetchMore({
+      variables: {
+        limit: 2,
+        before: get(data, "listFoos.pageInfo.startCursor"),
+        query: input,
+      },
+    });
+  };
+
   const onClickNext = () => {
     fetchMore({
       variables: {
@@ -53,7 +73,6 @@ function App() {
     });
   };
 
-  if (loading) return <p>Loading...</p>;
   if (error) return <p>Error : {error.message}</p>;
 
   return (
@@ -66,12 +85,16 @@ function App() {
         }}
         value={input}
       />
-      {data && data.listFoos.pageInfo.hasNextPage && (
+      {loading && <p>Loading...</p>}
+      {!loading && data && data.listFoos.pageInfo.hasPreviousPage && (
+        <button onClick={onClickPrevious}>previous</button>
+      )}
+      {!loading && data && data.listFoos.pageInfo.hasNextPage && (
         <button onClick={onClickNext}>next</button>
       )}
-      {data && (
+      {!loading && data && (
         <ul>
-          {data.listFoos.edges.map((edge) => {
+          {data.listFoos.edges.map((edge: FooEdge) => {
             return <li key={edge.cursor}>{edge.cursor}</li>;
           })}
         </ul>

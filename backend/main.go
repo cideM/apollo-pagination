@@ -35,14 +35,14 @@ type FooConnection struct {
 }
 
 var foos = []string{
+  "bus brand",
   "bus driver",
   "bus factor",
-  "bus station",
-  "bus terminal",
-  "bus brand",
-  "bus tires",
-  "bus stop",
   "bus line",
+  "bus station",
+  "bus stop",
+  "bus terminal",
+  "bus tires",
 }
 
 func (_ *query) ListFoos(_ context.Context, args struct {
@@ -85,6 +85,10 @@ func (_ *query) ListFoos(_ context.Context, args struct {
 			}
 		}
 
+		sort.Slice(edges, func(i, j int) bool {
+			return edges[i].Node < edges[j].Node
+		})
+
 		if len(edges) > 0 {
 			if edges[len(edges)-1].Node < filtered[len(filtered)-1] {
 				pageInfo.HasNextPage = true
@@ -101,7 +105,7 @@ func (_ *query) ListFoos(_ context.Context, args struct {
 			pageInfo.HasNextPage = true
 		}
 
-		for i := len(filtered) - 1; i > 0; i-- {
+		for i := len(filtered) - 1; i >= 0; i-- {
 			s := filtered[i]
 			if s < before && len(edges) < limit {
 				edges = append(edges, FooEdge{s, s})
@@ -127,6 +131,10 @@ func (_ *query) ListFoos(_ context.Context, args struct {
 				edges = append(edges, FooEdge{s, s})
 			}
 		}
+
+		sort.Slice(edges, func(i, j int) bool {
+			return edges[i].Node < edges[j].Node
+		})
 
 		if len(edges) > 0 {
 			if edges[0].Node > filtered[0] {
